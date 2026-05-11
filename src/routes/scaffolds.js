@@ -2,8 +2,48 @@ import { Hono } from "hono";
 import { scaffolds as scaffTable } from "../data/schema.js";
 import { getDb, nowIso } from "../data/db.js";
 import { eq } from "drizzle-orm";
+import { scaffoldMaterials } from "../data/schema.js";
 
 const scaffolds = new Hono();
+
+scaffolds.get("/:id/materials", async (c) => {
+  const db = getDb(c.env.DB);
+
+  const id = Number(c.req.param("id"));
+
+  const materials = await db
+    .select()
+    .from(scaffoldMaterials)
+    .where(eq(scaffoldMaterials.scaffoldId, id));
+
+  return c.json(materials);
+});
+
+scaffolds.put("/:id/materials", async (c) => {
+  const db = getDb(c.env.DB);
+
+  const id = Number(c.req.param("id"));
+
+  const body = await c.req.json();
+
+  await db
+    .delete(scaffoldMaterials)
+    .where(eq(scaffoldMaterials.scaffoldId, id));
+
+  if (body.materials?.length) {
+    await db.insert(scaffoldMaterials).values(
+      body.materials.map((material) => ({
+        scaffoldId: id,
+        materialName: material.materialName,
+        quantity: material.quantity,
+      })),
+    );
+  }
+
+  return c.json({
+    message: "Materials updated successfully",
+  });
+});
 
 scaffolds.get("/", async (c) => {
   const db = getDb(c.env.DB);
