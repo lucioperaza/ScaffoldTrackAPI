@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import auth from "./routes/auth";
+import scaffolds from "./routes/scaffolds";
 
 const app = new Hono();
 
@@ -10,5 +11,6 @@ app.get("/", (c) => {
 });
 
 app.route("/api/auth", auth);
+app.route("/api/scaffolds", scaffolds);
 
 export default app;
