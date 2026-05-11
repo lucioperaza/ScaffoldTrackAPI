@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import bcrypt from "bcryptjs";
 import { getDb } from "../data/db.js";
 import { users } from "../data/schema.js";
+import { eq } from "drizzle-orm";
 
 const auth = new Hono();
 
@@ -37,6 +38,47 @@ auth.post("/register", async (c) => {
       409,
     );
   }
+});
+
+auth.post("/login", async (c) => {
+  const db = getDb(c.env.DB);
+
+  const body = await c.req.json();
+
+  const result = await db
+    .select()
+    .from(users)
+    .where(eq(users.email, body.email));
+
+  const user = result[0];
+
+  if (!user) {
+    return c.json(
+      {
+        error: "Invalid email or password",
+      },
+      401,
+    );
+  }
+
+  const passwordMatch = await bcrypt.compare(body.password, user.passwordHash);
+
+  if (!passwordMatch) {
+    return c.json(
+      {
+        error: "Invalid email or password",
+      },
+      401,
+    );
+  }
+
+  return c.json({
+    message: "Login successful",
+    user: {
+      id: user.id,
+      email: user.email,
+    },
+  });
 });
 
 export default auth;
