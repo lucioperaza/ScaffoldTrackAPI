@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `scaffolds_tag_number_unique` ON `scaffolds` (`tag_number`);

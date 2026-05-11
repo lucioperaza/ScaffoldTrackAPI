@@ -73,7 +73,7 @@ auth.post("/login", async (c) => {
   }
 
   return c.json({
-    message: "Login successful",
+    accessToken: `user-${user.id}-token`,
     user: {
       id: user.id,
       email: user.email,

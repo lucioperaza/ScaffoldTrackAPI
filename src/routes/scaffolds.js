@@ -113,12 +113,20 @@ scaffolds.post("/", async (c) => {
     height: body.height,
     createdAt: nowIso(),
   };
+  try {
+    await db.insert(scaffTable).values(newScaffold);
 
-  await db.insert(scaffTable).values(newScaffold);
-
-  return c.json({
-    message: "Scaffold created successfully",
-  });
+    return c.json({
+      message: "Scaffold created successfully",
+    });
+  } catch {
+    return c.json(
+      {
+        error: "Tag Number already exists",
+      },
+      409,
+    );
+  }
 });
 
 scaffolds.delete("/:id", async (c) => {

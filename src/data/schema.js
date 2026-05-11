@@ -17,7 +17,7 @@ export const scaffolds = sqliteTable("scaffolds", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),
   location: text("location").notNull(),
-  tagNumber: text("tag_number").notNull(),
+  tagNumber: text("tag_number").notNull().unique(),
   length: integer("length"),
   width: integer("width"),
   height: integer("height"),
