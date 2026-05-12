@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import { getDb } from "../data/db.js";
 import { users } from "../data/schema.js";
 import { eq } from "drizzle-orm";
+import { sign } from "hono/jwt";
 
 const auth = new Hono();
 
@@ -72,8 +73,17 @@ auth.post("/login", async (c) => {
     );
   }
 
+  const accessToken = await sign(
+    {
+      userId: user.id,
+      email: user.email,
+      exp: Math.floor(Date.now() / 1000) + 60 * 15,
+    },
+    c.env.JWT_SECRET,
+  );
+
   return c.json({
-    accessToken: `user-${user.id}-token`,
+    accessToken,
     user: {
       id: user.id,
       email: user.email,
