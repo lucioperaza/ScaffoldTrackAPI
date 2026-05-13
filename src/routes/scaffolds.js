@@ -147,10 +147,12 @@ scaffolds.post("/", async (c) => {
     createdAt: nowIso(),
   };
   try {
-    await db.insert(scaffTable).values(newScaffold);
+    const result = await db.insert(scaffTable).values(newScaffold).returning();
 
     return c.json({
       message: "Scaffold created successfully",
+
+      scaffold: result[0],
     });
   } catch {
     return c.json(
