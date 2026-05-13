@@ -162,4 +162,24 @@ auth.post("/refresh", async (c) => {
   }
 });
 
+auth.post("/logout", async (c) => {
+  const db = getDb(c.env.DB);
+  const body = await c.req.json();
+  const refreshToken = body.refreshToken;
+
+  if (!refreshToken) {
+    return c.json(
+      {
+        error: "Refresh token required",
+      },
+      400,
+    );
+  }
+
+  await db.delete(refreshTokens).where(eq(refreshTokens.token, refreshToken));
+
+  return c.json({
+    message: "Logged out successfully",
+  });
+});
 export default auth;
