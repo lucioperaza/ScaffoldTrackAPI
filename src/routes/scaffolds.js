@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { scaffolds as scaffTable } from "../data/schema.js";
 import { getDb, nowIso } from "../data/db.js";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { scaffoldMaterials } from "../data/schema.js";
 import { authMiddleware } from "../middleware/authentication.js";
 
@@ -10,9 +10,21 @@ scaffolds.use("*", authMiddleware);
 
 scaffolds.get("/:id/materials", async (c) => {
   const db = getDb(c.env.DB);
-
+  const user = c.get("user");
   const id = Number(c.req.param("id"));
+  const scaffold = await db
+    .select()
+    .from(scaffTable)
+    .where(and(eq(scaffTable.id, id), eq(scaffTable.userId, user.userId)));
 
+  if (!scaffold.length) {
+    return c.json(
+      {
+        error: "Scaffold not found",
+      },
+      404,
+    );
+  }
   const materials = await db
     .select()
     .from(scaffoldMaterials)
@@ -23,11 +35,23 @@ scaffolds.get("/:id/materials", async (c) => {
 
 scaffolds.put("/:id/materials", async (c) => {
   const db = getDb(c.env.DB);
-
+  const user = c.get("user");
   const id = Number(c.req.param("id"));
 
   const body = await c.req.json();
+  const scaffold = await db
+    .select()
+    .from(scaffTable)
+    .where(and(eq(scaffTable.id, id), eq(scaffTable.userId, user.userId)));
 
+  if (!scaffold.length) {
+    return c.json(
+      {
+        error: "Scaffold not found",
+      },
+      404,
+    );
+  }
   await db
     .delete(scaffoldMaterials)
     .where(eq(scaffoldMaterials.scaffoldId, id));
@@ -50,20 +74,24 @@ scaffolds.put("/:id/materials", async (c) => {
 scaffolds.get("/", async (c) => {
   const db = getDb(c.env.DB);
 
-  const allScaffolds = await db.select().from(scaffTable);
+  const user = c.get("user");
 
+  const allScaffolds = await db
+    .select()
+    .from(scaffTable)
+    .where(eq(scaffTable.userId, user.userId));
   return c.json(allScaffolds);
 });
 
 scaffolds.get("/:id", async (c) => {
   const db = getDb(c.env.DB);
-
+  const user = c.get("user");
   const id = Number(c.req.param("id"));
 
   const result = await db
     .select()
     .from(scaffTable)
-    .where(eq(scaffTable.id, id));
+    .where(and(eq(scaffTable.id, id), eq(scaffTable.userId, user.userId)));
 
   const scaffold = result[0];
 
@@ -81,7 +109,7 @@ scaffolds.get("/:id", async (c) => {
 
 scaffolds.put("/:id", async (c) => {
   const db = getDb(c.env.DB);
-
+  const user = c.get("user");
   const id = Number(c.req.param("id"));
 
   const body = await c.req.json();
@@ -94,7 +122,10 @@ scaffolds.put("/:id", async (c) => {
     height: body.height,
   };
 
-  await db.update(scaffTable).set(updatedScaffold).where(eq(scaffTable.id, id));
+  await db
+    .update(scaffTable)
+    .set(updatedScaffold)
+    .where(and(eq(scaffTable.id, id), eq(scaffTable.userId, user.userId)));
 
   return c.json({
     message: "Scaffold updated successfully",
@@ -103,11 +134,11 @@ scaffolds.put("/:id", async (c) => {
 
 scaffolds.post("/", async (c) => {
   const db = getDb(c.env.DB);
-
+  const user = c.get("user");
   const body = await c.req.json();
 
   const newScaffold = {
-    userId: body.userId,
+    userId: user.userId,
     location: body.location,
     tagNumber: body.tagNumber,
     length: body.length,
@@ -133,10 +164,12 @@ scaffolds.post("/", async (c) => {
 
 scaffolds.delete("/:id", async (c) => {
   const db = getDb(c.env.DB);
-
+  const user = c.get("user");
   const id = Number(c.req.param("id"));
 
-  await db.delete(scaffTable).where(eq(scaffTable.id, id));
+  await db
+    .delete(scaffTable)
+    .where(and(eq(scaffTable.id, id), eq(scaffTable.userId, user.userId)));
 
   return c.json({
     message: "Scaffold deleted successfully",
