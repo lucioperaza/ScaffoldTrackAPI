@@ -22,6 +22,13 @@
       "when": 1778635422042,
       "tag": "0002_ancient_king_bedlam",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1778640963657,
+      "tag": "0003_omniscient_nomad",
+      "breakpoints": true
     }
   ]
 }

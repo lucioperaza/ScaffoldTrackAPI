@@ -5,6 +5,7 @@ import {
   check,
   text,
   sqliteTable,
+  unique,
 } from "drizzle-orm/sqlite-core";
 
 export const users = sqliteTable("users", {
@@ -23,16 +24,22 @@ export const refreshTokens = sqliteTable("refresh_tokens", {
   createdAt: text("created_at").notNull(),
 });
 
-export const scaffolds = sqliteTable("scaffolds", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  userId: integer("user_id").notNull(),
-  location: text("location").notNull(),
-  tagNumber: text("tag_number").notNull().unique(),
-  length: integer("length"),
-  width: integer("width"),
-  height: integer("height"),
-  createdAt: text("created_at").notNull(),
-});
+export const scaffolds = sqliteTable(
+  "scaffolds",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id").notNull(),
+    location: text("location").notNull(),
+    tagNumber: text("tag_number").notNull(),
+    length: integer("length"),
+    width: integer("width"),
+    height: integer("height"),
+    createdAt: text("created_at").notNull(),
+  },
+  (table) => ({
+    uniqueUserTag: unique().on(table.userId, table.tagNumber),
+  }),
+);
 
 export const scaffoldMaterials = sqliteTable("scaffold_materials", {
   id: integer("id").primaryKey({ autoIncrement: true }),
