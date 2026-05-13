@@ -3,8 +3,10 @@ import { scaffolds as scaffTable } from "../data/schema.js";
 import { getDb, nowIso } from "../data/db.js";
 import { eq } from "drizzle-orm";
 import { scaffoldMaterials } from "../data/schema.js";
+import { authMiddleware } from "../middleware/authentication.js";
 
 const scaffolds = new Hono();
+scaffolds.use("*", authMiddleware);
 
 scaffolds.get("/:id/materials", async (c) => {
   const db = getDb(c.env.DB);
