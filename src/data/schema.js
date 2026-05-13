@@ -13,6 +13,16 @@ export const users = sqliteTable("users", {
   passwordHash: text("password_hash").notNull(),
 });
 
+export const refreshTokens = sqliteTable("refresh_tokens", {
+  id: integer("id").primaryKey(),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
+  token: text("token").notNull(),
+  expiresAt: text("expires_at").notNull(),
+  createdAt: text("created_at").notNull(),
+});
+
 export const scaffolds = sqliteTable("scaffolds", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   userId: integer("user_id").notNull(),

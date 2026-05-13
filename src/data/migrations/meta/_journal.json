@@ -15,6 +15,13 @@
       "when": 1778535138870,
       "tag": "0001_shocking_cyclops",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1778635422042,
+      "tag": "0002_ancient_king_bedlam",
+      "breakpoints": true
     }
   ]
 }
